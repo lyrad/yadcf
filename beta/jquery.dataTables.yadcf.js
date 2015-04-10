@@ -1926,7 +1926,51 @@ var yadcf = (function ($) {
 					}
 				}
 
-				if (columnObj.append_data_to_table_data === undefined) {
+				//OPTGROUP
+				//Extract different values for optgroup into an array (optgroup_list)
+				//Spliting column data into optgroup indexed array 
+				var optgroup_list = new Array();
+				var column_data_splited = new Array();
+				for (ii = 0; ii < column_data.length; ii++) {
+					//Force data to object
+					if(typeof column_data[ii] !== 'object' ) {
+						var reccord = {value: column_data[ii], label: column_data[ii]};
+					} else {
+						var reccord = column_data[ii];
+					}
+					
+					//Setting a defaut optgroup for reccords with no 'optgroup' attribute
+					if (reccord['optgroup'] === undefined) {
+						var optgroup = "_DEFAULT";
+					} else {
+						var optgroup = reccord['optgroup'];
+					}
+					
+					//If first time the optgroup value is encountered
+					if (optgroup_list.indexOf(optgroup) < 0 ) {
+						//Adding to the list array, creating an empty for optgroup reccords
+						optgroup_list.push(optgroup);
+						column_data_splited[optgroup_list.indexOf(optgroup)] = new Array();
+					}
+					//Adding reccord into optgroup indexed array					
+					column_data_splited[optgroup_list.indexOf(optgroup)].push( { value: reccord['value'], label: reccord['label'] } );
+				}
+
+				for ( var optgroupIndex in column_data_splited ) {
+					if(optgroup_list[optgroupIndex] != "_DEFAULT") {
+						options_tmp += "<optgroup label=\"" + optgroup_list[optgroupIndex] + "\">";
+						for (ii = 0; ii < column_data_splited[optgroupIndex].length; ii++) {
+							options_tmp += "<option value=\"" + column_data_splited[optgroupIndex][ii].value + "\">" + column_data_splited[optgroupIndex][ii].label + "</option>";
+						}
+						options_tmp += '</optgroup>';
+					} else {
+						for (ii = 0; ii < column_data_splited[optgroupIndex].length; ii++) {
+							options_tmp += "<option value=\"" + column_data_splited[optgroupIndex][ii].value + "\">" + column_data_splited[optgroupIndex][ii].label + "</option>";
+						}
+					}
+				}
+
+				/*if (columnObj.append_data_to_table_data === undefined) {
 					if (typeof column_data[0] === 'object') {
 						for (ii = 0; ii < column_data.length; ii++) {
 							options_tmp += "<option value=\"" + column_data[ii].value + "\">" + column_data[ii].label + "</option>";
@@ -1944,7 +1988,7 @@ var yadcf = (function ($) {
 							options_tmp += "<option value=\"" + column_data[ii] + "\">" + column_data[ii] + "</option>";
 						}
 					}
-				}
+				}*/
 				column_data = options_tmp;
 
 				if ($filter_selector.length === 1) {
